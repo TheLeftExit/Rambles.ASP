@@ -26,9 +26,13 @@ namespace Rambles.Data {
             _ramblesByUrl = new(StringComparer.OrdinalIgnoreCase);
         }
 
-        public Ramble GetRamble(string url) {
+        public Ramble GetRambleByUrl(string url) {
             var trimmedUrl = PrepareUrl(url);
             return _ramblesByUrl[trimmedUrl];
+        }
+
+        public Ramble[] GetRambles() {
+            return _ramblesByUrl.Values.ToArray();
         }
 
         public async Task Refresh() {
@@ -74,13 +78,13 @@ namespace Rambles.Data {
                 bool toAdd = !rambleIds.Contains(id);
                 if (toAdd) {
                     RambleInfo info = new(id, lastWriteTimesById[id]);
-                    Ramble ramble = await GetRambleCoreAsync(info);
+                    Ramble ramble = await GetRambleAsync(info);
                     _ramblesByUrl.Add(ramble.Url, ramble);
                 }
             }
         }
 
-        private async Task<Ramble> GetRambleCoreAsync(RambleInfo info) {
+        private async Task<Ramble> GetRambleAsync(RambleInfo info) {
             var rawText = await _fileManager.ReadTextAsync(info.Id);
             var markdownDocument = Markdown.Parse(rawText, _markdownPipeline);
             var text = markdownDocument.ToHtml(_markdownPipeline);

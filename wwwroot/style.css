@@ -1,0 +1,55 @@
+﻿* {
+    color: #FFFFFFD0;
+    overflow: hidden;
+}
+
+html {
+    background: #252626;
+}
+
+.page {
+    max-width: 40em;
+    margin: auto;
+    font-family: Bahnschrift, Tahoma, Verdana, Arial, sans-serif;
+}
+
+.title {
+    margin: 0 1em;
+}
+
+.header {
+    display: flex;
+    list-style-type: none;
+    background-color: #FFFFFF18;
+}
+
+    .header ul {
+        list-style-type: none;
+        display: flex;
+        padding: 0 1em;
+        margin: 0;
+    }
+
+    .header li a {
+        display: flex;
+        padding: 0.5em;
+        text-decoration: none;
+    }
+
+    .header li:hover {
+        background-color: #FFFFFF20;
+    }
+
+.content {
+    margin: 0 1em;
+}
+
+.footer {
+    margin: 1em;
+}
+
+.footer-date {
+    padding-left: 0;
+    padding-right: 1em;
+    color: #FFFFFF40;
+}

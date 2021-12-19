@@ -1,0 +1,55 @@
+﻿@page
+@using Rambles.Data
+@using Microsoft.AspNetCore.Components;
+@inject RambleService RambleService
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Rambles";
+
+    if (Request.Path == "/RamblePage")
+        throw null;
+
+    Ramble ramble = RambleService.GetRambleByUrl(Request.Path);
+    Ramble[] allRambles = RambleService.GetRambles();
+
+    var headerRambles = allRambles
+        .Where(x => x.HeaderIndex is not null)
+        .OrderBy(x => x.HeaderIndex);
+
+    var footerRambles = allRambles
+        .Where(x => x.Date is not null)
+        .OrderByDescending(x => x.Date);
+
+    ;
+}
+
+<div class="page">
+    <div class="title">
+        <h1>theleftexit.net</h1>
+    </div>
+    <div class="header">
+        <ul>
+            @foreach(Ramble r in headerRambles) {
+                <li>
+                    <a href=@r.Url>@r.Title</a>
+                </li>
+            }
+        </ul>
+    </div>
+    <div class="content">
+        @Html.Raw(ramble.Text)
+    </div>
+    <div class="footer">
+        <table>
+            @foreach(Ramble r in footerRambles) {
+                <tr>
+                    <td class="footer-date">@r.Date.ToString()</td>
+                    <td class="footer-title">
+                        <a href=@r.Url>@r.Title</a>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>

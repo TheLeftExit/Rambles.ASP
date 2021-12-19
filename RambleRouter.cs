@@ -9,8 +9,11 @@ public class RambleRouter : DynamicRouteValueTransformer {
         if (rambleService is not null) {
             await rambleService.Refresh();
             string path = httpContext.Request.Path;
+
             if (rambleService.Contains(path))
-                newValues["page"] = "/Ramble";
+                newValues["page"] = "/RamblePage";
+
+            
         }
 
         return newValues;

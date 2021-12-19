@@ -5,7 +5,7 @@
         public string Id => _info.Id;
         public DateTime LastWriteTime => _info.LastWriteTime;
         public string Url => Id;
-        public string? Title => _attributes.Title;
+        public string Title => _attributes.Title ?? Id;
         public DateOnly? Date => _attributes.Date;
         public int? HeaderIndex => _attributes.HeaderIndex;
 
