@@ -4,7 +4,9 @@ Date: 11/19/2021
 Title: Home
 ---
 
-# Rambles
+Welcome.
+
+Lorem ipsum
 
 Hello world!
 

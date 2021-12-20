@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Routing;
 using Rambles.Data;
+using System.Runtime.InteropServices;
 
 public class RambleRouter : DynamicRouteValueTransformer {
     public override async ValueTask<RouteValueDictionary> TransformAsync(HttpContext httpContext, RouteValueDictionary values) {
@@ -21,15 +22,14 @@ public class RambleRouter : DynamicRouteValueTransformer {
 }
 
 public static class RambleRouterExtensions {
-    public static void ConfigureRambles(this WebApplicationBuilder builder) {
-        string webRootPath = builder.Environment.WebRootPath;
-        var rambleServicePrototype = new RambleService(webRootPath);
+    public static void ConfigureRambles(this WebApplicationBuilder builder, string rootPath) {
+        var rambleServicePrototype = new RambleService(rootPath);
         builder.Services.AddSingleton(rambleServicePrototype);
 
         builder.Services.AddSingleton<RambleRouter>();
     }
 
-    public static void MapRambles(this IEndpointRouteBuilder builder) {
+    public static void MapRambles(this WebApplication builder) {
         builder.MapDynamicPageRoute<RambleRouter>("{path?}");
     }
 }
