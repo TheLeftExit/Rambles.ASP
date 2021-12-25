@@ -1,6 +1,7 @@
 ﻿using Markdig;
 using Markdig.Extensions.Yaml;
 using Markdig.Syntax;
+using System.Diagnostics;
 using YamlDotNet.Serialization;
 
 namespace Rambles.Data {
@@ -12,7 +13,9 @@ namespace Rambles.Data {
 
         private Dictionary<string, Ramble> _ramblesByUrl;
 
-        public RambleService(string contentRoot) {
+        public string HeaderCaption { get; }
+
+        public RambleService(string mdPath, string headerCaption) {
             _markdownPipeline = new MarkdownPipelineBuilder()
                 .UseYamlFrontMatter()
                 .Build();
@@ -21,14 +24,17 @@ namespace Rambles.Data {
                 .IgnoreUnmatchedProperties()
                 .Build();
 
-            _fileManager = new(contentRoot);
-
+            _fileManager = new(mdPath);
             _ramblesByUrl = new(StringComparer.OrdinalIgnoreCase);
+
+            HeaderCaption = headerCaption;
         }
 
         public Ramble GetRambleByUrl(string url) {
             var trimmedUrl = PrepareUrl(url);
-            return _ramblesByUrl[trimmedUrl];
+            return _ramblesByUrl.TryGetValue(trimmedUrl, out Ramble? ramble)
+                ? ramble
+                : Ramble.NotFound;
         }
 
         public Ramble[] GetRambles() {

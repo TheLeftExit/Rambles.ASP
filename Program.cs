@@ -1,29 +1,12 @@
-string? path = args.FirstOrDefault();
+using Rambles.Data;
 
-WebApplicationBuilder builder;
+string root = Directory.GetCurrentDirectory();
+string header = args.FirstOrDefault() ?? "Rambles";
 
-if (path is not null) {
-    Directory.SetCurrentDirectory(path);
-    var options = new WebApplicationOptions {
-        ContentRootPath = path,
-        WebRootPath = path
-    };
-    builder = WebApplication.CreateBuilder(options);
-} else {
-    builder = WebApplication.CreateBuilder();
-}
-
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions() { WebRootPath = root });
 builder.Services.AddRazorPages();
-builder.ConfigureRambles(path ?? builder.Environment.WebRootPath);
-
+builder.Services.AddSingleton(new RambleService(root, header));
 var app = builder.Build();
-
-app.MapRambles();
-
-app.MapRazorPages();
-
-app.UseStaticFiles();
-
-app.MapFallbackToPage("/NotFound");
-
+app.UseStaticFiles(new StaticFileOptions() { ServeUnknownFileTypes = true });
+app.MapFallbackToPage("{*path}", "/_Host");
 app.Run();

@@ -20,6 +20,15 @@
             Text = text;
             _attributes = attributes;
         }
+
+        public static Ramble NotFound
+            = new Ramble(
+                new ("notfound.md", DateTime.MinValue),
+                "<h2>Not Found</h2><p>...back to <a href=\"/\">index</a>?</p>",
+                new() { Title = "Not Found" }
+            );
+
+        public bool Is404 => this == NotFound;
     }
 
     public class RambleAttributes {
