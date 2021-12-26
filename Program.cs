@@ -7,6 +7,8 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions() { WebRoot
 builder.Services.AddRazorPages();
 builder.Services.AddSingleton(new RambleService(root, header));
 var app = builder.Build();
+// app.MapFallbackToPage("/sitemap.xml", "/_Sitemap"); // Disabled until I find a way to retrieve the URL requested behind reverse proxy.
+app.MapFallbackToPage("{path}.md", "/_Host");
 app.UseStaticFiles(new StaticFileOptions() { ServeUnknownFileTypes = true });
-app.MapFallbackToPage("{*path}", "/_Host");
+app.MapFallbackToPage("/_Host");
 app.Run();
