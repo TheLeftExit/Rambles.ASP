@@ -25,9 +25,10 @@ namespace Rambles.Data {
         }
 
         public async Task Update() {
-            RambleInfo[] updatedInfo = RambleFileManager.EnumerateRambleInfo().ToArray();
+            RambleInfo[] updatedInfo = RambleFileManager.EnumerateRambleInfo().OrderBy(x => x.LastWriteTime).ToArray();
             var isUpdated = _ramblesByUrl.Values
                 .Select(x => x.GetRambleInfo())
+                .OrderBy(x => x.LastWriteTime)
                 .SequenceEqual(updatedInfo);
             if (!isUpdated) {
                 var tasks = updatedInfo.Select(GetRambleAsync);
