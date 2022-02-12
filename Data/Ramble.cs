@@ -1,48 +1,37 @@
 ﻿namespace Rambles.Data {
     public class Ramble {
-        public string Text { get; }
-
-        public string Id => _info.Id;
-        public DateTime LastWriteTime => _info.LastWriteTime;
-        public string Url => Id;
-        public string Title => _attributes.Title ?? Id;
-        // YamlDotNet (or rather the Linux .NET runtime) cannot System.Convert.ChangeType DateOnly.
-        public DateOnly? Date => _attributes.Date is DateTime dateTime ? DateOnly.FromDateTime(dateTime) : null;
-        public int? HeaderIndex => _attributes.HeaderIndex;
-
-        private RambleInfo _info { get; }
-        private RambleAttributes _attributes { get; }
-
-        public RambleInfo GetInfo() => _info;
-
-        public Ramble(RambleInfo info, string text, RambleAttributes attributes) {
-            _info = info;
+        public Ramble(string text, RambleInfo info, RambleAttributes attributes) {
             Text = text;
+            _info = info;
             _attributes = attributes;
         }
+        private RambleInfo _info;
+        private RambleAttributes _attributes;
+
+        public RambleInfo GetRambleInfo() => _info;
+
+        public string Text { get; }
+        public string Id => _info.Id;
+        public DateTime LastWriteTime => _info.LastWriteTime;
+        public string Title => _attributes.Title ?? Id;
+        public DateOnly? Date => _attributes.Date;
+        public int? HeaderIndex => _attributes.HeaderIndex;
 
         public static Ramble NotFound
             = new Ramble(
-                new ("notfound.md", DateTime.MinValue),
-                "<h2>Not Found</h2><p>...back to <a href=\"/\">index</a>?</p>",
-                new() { Title = "Not Found" }
+                text: @"<h2>Not Found</h2><p>...back to <a href=""/"">index</a>?</p>",
+                info: new("notfound.md", DateTime.MinValue),
+                attributes: new() { Title = "NotFound" }
             );
-
         public bool Is404 => this == NotFound;
     }
 
-    public class RambleAttributes {
-        public string? Title { get; set; }
-        public DateTime? Date { get; set; }
-        public int? HeaderIndex { get; set; }
-    }
+    public record RambleInfo(string Id, DateTime LastWriteTime);
 
-    public class RambleInfo {
-        public string Id { get; }
-        public DateTime LastWriteTime { get; }
-        public RambleInfo(string id, DateTime lastWriteTime) {
-            Id = id;
-            LastWriteTime = lastWriteTime;
-        }
+    public class RambleAttributes {
+        public string Title { get; init; }
+        public DateOnly? Date { get; init; }
+        public int? HeaderIndex { get; init; }
+        public bool HideFooter { get; init; }
     }
 }

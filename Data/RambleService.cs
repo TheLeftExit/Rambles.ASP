@@ -6,100 +6,49 @@ using YamlDotNet.Serialization;
 
 namespace Rambles.Data {
     public partial class RambleService {
-        private RambleFileManager _fileManager;
-
-        private MarkdownPipeline _markdownPipeline;
-        private IDeserializer _yamlDeserializer;
-
-        private Dictionary<string, Ramble> _ramblesByUrl;
-
-        public string HeaderCaption { get; }
-
-        public RambleService(string mdPath, string headerCaption) {
-            _markdownPipeline = new MarkdownPipelineBuilder()
-                .UseYamlFrontMatter()
-                .Build();
-
-            _yamlDeserializer = new DeserializerBuilder()
-                .IgnoreUnmatchedProperties()
-                .Build();
-
-            _fileManager = new(mdPath);
-            _ramblesByUrl = new(StringComparer.OrdinalIgnoreCase);
-
-            HeaderCaption = headerCaption;
-        }
+        // Storage & public API
+        private Dictionary<string, Ramble> _ramblesByUrl =
+            new(StringComparer.OrdinalIgnoreCase);
 
         public Ramble GetRambleByUrl(string url) {
-            var trimmedUrl = PrepareUrl(url);
-            return _ramblesByUrl.TryGetValue(trimmedUrl, out Ramble? ramble)
+            url = url.Trim('/');
+            url = string.IsNullOrEmpty(url)
+                ? "index.md"
+                : Path.ChangeExtension(url, ".md");
+            return _ramblesByUrl.TryGetValue(url, out Ramble ramble)
                 ? ramble
                 : Ramble.NotFound;
         }
 
-        public Ramble[] GetRambles() {
-            return _ramblesByUrl.Values.ToArray();
+        public IEnumerable<Ramble> GetAllRambles() {
+            return _ramblesByUrl.Values;
         }
 
-        public async Task Refresh() {
-            await UpdateRambles();
-        }
-
-        public bool Contains(string url) {
-            var trimmedUrl = PrepareUrl(url);
-            return _ramblesByUrl.ContainsKey(trimmedUrl);
-        }
-
-        private string PrepareUrl(string url) {
-            if (url == "/") return "index.md";
-            return Path.ChangeExtension(url.TrimStart('/'), ".md");
-        }
-
-        private async Task UpdateRambles() {
-            // Id : LastWriteTime
-            Dictionary<string, DateTime> lastWriteTimesById = _fileManager
-                .EnumerateRambleInfo()
-                .ToDictionary(
-                    x => x.Id,
-                    x => x.LastWriteTime
-                );
-
-            // 1. Clear removed/outdated entries.
-            var urlsToRemove = _ramblesByUrl.Values
-                .Where(x =>
-                    !lastWriteTimesById.TryGetValue(x.Id, out DateTime lastWriteTime)
-                    || lastWriteTime != x.LastWriteTime
-                )
-                .Select(x => x.Url)
-                .ToArray();
-            foreach(string url in urlsToRemove) {
-                _ramblesByUrl.Remove(url);
-            }
-
-            // 2. Add updated/missing entries.
-            var rambleIds = _ramblesByUrl.Values
-                .Select(x => x.Id)
-                .ToHashSet();
-            foreach(string id in lastWriteTimesById.Keys) {
-                bool toAdd = !rambleIds.Contains(id);
-                if (toAdd) {
-                    RambleInfo info = new(id, lastWriteTimesById[id]);
-                    Ramble ramble = await GetRambleAsync(info);
-                    _ramblesByUrl.Add(ramble.Url, ramble);
-                }
+        public async Task Update() {
+            RambleInfo[] updatedInfo = RambleFileManager.EnumerateRambleInfo().ToArray();
+            var isUpdated = _ramblesByUrl.Values
+                .Select(x => x.GetRambleInfo())
+                .SequenceEqual(updatedInfo);
+            if (!isUpdated) {
+                var tasks = updatedInfo.Select(GetRambleAsync);
+                var result = await Task.WhenAll(tasks);
+                _ramblesByUrl = result.ToDictionary(
+                        x => x.Id,
+                        x => x
+                    );
             }
         }
 
         private async Task<Ramble> GetRambleAsync(RambleInfo info) {
-            var rawText = await _fileManager.ReadTextAsync(info.Id);
-            var markdownDocument = Markdown.Parse(rawText, _markdownPipeline);
-            var text = markdownDocument.ToHtml(_markdownPipeline);
+            var rawText = await RambleFileManager.ReadRambleTextAsync(info.Id);
+            var markdownDocument = Markdown.Parse(rawText, RambleSettings.MarkdownPipeline);
+            var text = markdownDocument.ToHtml(RambleSettings.MarkdownPipeline);
             var attributes = GetAttributes(markdownDocument);
-            return new Ramble(info, text, attributes);
+            return new Ramble(text, info, attributes);
         }
 
         private RambleAttributes GetAttributes(MarkdownDocument document) {
-            string? rawAttributes = document
+            string rawAttributes = document
                 .Descendants<YamlFrontMatterBlock>()
                 .FirstOrDefault()?
                 .Lines
@@ -111,7 +60,7 @@ namespace Rambles.Data {
             if (string.IsNullOrEmpty(rawAttributes))
                 return new();
 
-            return _yamlDeserializer.Deserialize<RambleAttributes>(rawAttributes);
+            return RambleSettings.YamlDeserializer.Deserialize<RambleAttributes>(rawAttributes);
         }
     }
 }

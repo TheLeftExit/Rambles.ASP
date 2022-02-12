@@ -3,8 +3,10 @@
 @using Microsoft.AspNetCore.Http.Extensions
 @inject RambleService RambleService
 @{
-    await RambleService.Refresh();
-    var rambles = RambleService.GetRambles().Where(x => x.Date is not null || x.HeaderIndex is not null);
+    await RambleService.Update();
+
+    var rambles = RambleService.GetAllRambles()
+        .Where(x => x.Date is not null || x.HeaderIndex is not null);
 
     this.Response.ContentType = "text/xml";
     string requestPath = Request.GetDisplayUrl();
@@ -13,7 +15,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     @foreach(var r in rambles) {
         <url>
-            <loc>@requestPath.Replace("sitemap.xml", r.Id)</loc>
+            <loc>@(RambleSettings.Default.BaseUrl + r.Id)</loc>
             <lastmod>@r.LastWriteTime.ToString("O")</lastmod>
         </url>
     }

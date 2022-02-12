@@ -1,14 +1,19 @@
 using Rambles.Data;
 
-string root = Directory.GetCurrentDirectory();
-string header = args.FirstOrDefault() ?? "Rambles";
+string configPath = args.FirstOrDefault();
+string configText = await File.ReadAllTextAsync(configPath);
+RambleSettings.ApplyDefault(configText);
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions() { WebRootPath = root });
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions() {
+    WebRootPath = RambleSettings.Default.RootDirectory,
+    //ContentRootPath = RambleSettings.Default.RootDirectory
+});
+
 builder.Services.AddRazorPages();
-builder.Services.AddSingleton(new RambleService(root, header));
+builder.Services.AddSingleton<RambleService>();
 var app = builder.Build();
-// app.MapFallbackToPage("/sitemap.xml", "/_Sitemap"); // Disabled until I find a way to retrieve the URL requested behind reverse proxy.
+app.MapFallbackToPage("/sitemap.xml", "/_Sitemap");
 app.MapFallbackToPage("{path}.md", "/_Host");
 app.UseStaticFiles(new StaticFileOptions() { ServeUnknownFileTypes = true });
 app.MapFallbackToPage("/_Host");
-app.Run();
+await app.RunAsync();
