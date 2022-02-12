@@ -41,19 +41,21 @@
         <div class="content">
             @Html.Raw(ramble.Text)
         </div>
-        <hr />
-        <div class="footer">
-            <table>
-                @foreach (Ramble r in footerRambles) {
-                    <tr>
-                        <td class="footer-date">@r.Date</td>
-                        <td class="footer-title">
-                            <a href=@r.Id>@r.Title</a>
-                        </td>
-                    </tr>
-                }
-            </table>
-        </div>
+        @if (!ramble.HideFooter) {
+            <hr />
+            <div class="footer">
+                <table>
+                    @foreach (Ramble r in footerRambles) {
+                        <tr>
+                            <td class="footer-date">@r.Date</td>
+                            <td class="footer-title">
+                                <a href=@r.Id>@r.Title</a>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        }
     </div>
 </body>
 </html>

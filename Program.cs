@@ -1,6 +1,6 @@
 using Rambles.Data;
 
-string configPath = args.FirstOrDefault();
+string configPath = args.FirstOrDefault() ?? "rambles.cfg";
 string configText = await File.ReadAllTextAsync(configPath);
 RambleSettings.ApplyDefault(configText);
 

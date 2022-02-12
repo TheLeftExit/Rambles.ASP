@@ -16,12 +16,13 @@
         public string Title => _attributes.Title ?? Id;
         public DateOnly? Date => _attributes.Date;
         public int? HeaderIndex => _attributes.HeaderIndex;
+        public bool HideFooter => _attributes.HideFooter;
 
         public static Ramble NotFound
             = new Ramble(
                 text: @"<h2>Not Found</h2><p>...back to <a href=""/"">index</a>?</p>",
                 info: new("notfound.md", DateTime.MinValue),
-                attributes: new() { Title = "NotFound" }
+                attributes: new() { Title = "NotFound", HideFooter = true }
             );
         public bool Is404 => this == NotFound;
     }

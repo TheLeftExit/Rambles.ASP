@@ -8,6 +8,7 @@ A page file has the following format:
 Title: Home
 Date: 12/26/2021 # If specified, the page is added to the footer and sorted by this value.
 HeaderIndex: 0 # If specified, the page is added to the header and sorted by this value.
+HideFooter: true # If explicitly set to true, removes the footer from the page.
 ---
 Markdown-formatted page content
 ```
@@ -21,7 +22,7 @@ A sitemap containing all pages with either `Date` or `HeaderIndex` set is availa
 `lastmod` value is set to page file's last write date.
 
 ## Configuration
-Settings are supplied via a config file specified as the single command line argument. The format is as follows:
+Settings are supplied via a config file specified as the single command line argument (`rambles.cfg` by default). The format is as follows:
 ```yaml
 WebsiteName: Hello world! # Displayed at the top of every page.
 BaseUrl: https://example.com/ # Used to build the sitemap.
