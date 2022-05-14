@@ -1,7 +1,7 @@
 # Rambles
 A minimal ASP.NET Core website that serves Markdown files with YAML front matter as minimalistic blog pages.
 
-**This repository is no longer maintained. Rambles has been reworked into a CLI tool which can be found on [GitLab](https://gitlab.com/TheLeftExit/theleftexit.gitlab.io) (including DI, CI/CD and other cool two-letter stuff).**
+**This repository is no longer maintained. Rambles has been reworked into a CLI tool which can be found [here](https://github.com/TheLeftExit/Rambles) (including DI, CI/CD and other cool two-letter stuff).**
 
 ## Pages
 A page file has the following format:
